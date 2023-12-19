@@ -1,0 +1,91 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import pandas as pd
+%matplotlib inline
+
+# Reading the dataset
+iris = pd.read_csv(r"C:\Users\PRIYAM\Documents\Jupyter\Iris Flowers Classification\iris.csv")
+iris = iris.drop('Unnamed: 0', axis=1)
+
+# Checking for null values
+iris.isnull().sum()
+
+# Checking the distribution of Species
+iris['Species'].value_counts()
+
+# Checking the number of instances for each species
+n = len(iris[iris['Species'] == 'versicolor'])
+print("No of Versicolor in Dataset:", n)
+
+n1 = len(iris[iris['Species'] == 'setosa'])
+print("No of setosa in dataset", n1)
+
+n2 = len(iris[iris['Species'] == 'virginica'])
+print("No of virginica in dataset", n2)
+
+# Checking for outliers
+plt.figure(1)
+plt.boxplot([iris['Sepal.Length']])
+plt.figure(2)
+plt.boxplot([iris['Sepal.Width']])
+plt.show()
+
+# Plotting histograms
+iris.hist()
+plt.figure(figsize=(10, 7))
+plt.show()
+
+# Pairplot for visualizing relationships
+sns.pairplot(iris, hue='Species')
+
+# Splitting the Dataset
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn import metrics
+
+train, test = train_test_split(iris, test_size=0.3)
+train_X = train[['Sepal.Length', 'Sepal.Width', 'Petal.Length', 'Petal.Width']]
+train_y = train.Species
+test_X = test[['Sepal.Length', 'Sepal.Width', 'Petal.Length', 'Petal.Width']]
+test_y = test.Species
+
+# Using Logistic Regression
+model1 = LogisticRegression()
+model1.fit(train_X, train_y)
+prediction = model1.predict(test_X)
+print('Accuracy:', metrics.accuracy_score(prediction, test_y))
+
+# Using Support Vector Machine
+model2 = SVC()
+model2.fit(train_X, train_y)
+pred_y = model2.predict(test_X)
+print("Acc=", metrics.accuracy_score(test_y, pred_y))
+
+# Using KNN Neighbors
+model3 = KNeighborsClassifier(n_neighbors=5)
+model3.fit(train_X, train_y)
+y_pred2 = model3.predict(test_X)
+print("Accuracy Score:", metrics.accuracy_score(test_y, y_pred2))
+
+# Using Naive Bayes
+model4 = GaussianNB()
+model4.fit(train_X, train_y)
+y_pred3 = model4.predict(test_X)
+print("Accuracy Score:", metrics.accuracy_score(test_y, y_pred3))
+
+# Result of all the models
+results = pd.DataFrame({
+    'Model': ['Logistic Regression', 'Support Vector Machines', 'KNN', 'Naive Bayes'],
+    'Score': [metrics.accuracy_score(prediction, test_y),
+              metrics.accuracy_score(pred_y, test_y),
+              metrics.accuracy_score(y_pred2, test_y),
+              metrics.accuracy_score(y_pred3, test_y)]
+})
+
+result_df = results.sort_values(by='Score', ascending=False)
+result_df = result_df.set_index('Score')
+result_df.head(9)
